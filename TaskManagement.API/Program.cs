@@ -33,6 +33,17 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+// 1. ADDED CORS CONFIGURATION HERE
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173", "http://localhost:3000") // Added both common React ports
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 builder.Services.AddScoped<ITaskRepository>(provider => new TaskRepository(connectionString));
 builder.Services.AddScoped<IUserRepository>(provider => new UserRepository(connectionString));
 builder.Services.AddScoped<ITaskService, TaskService>();
@@ -51,6 +62,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("AllowFrontend");
 
 app.UseAuthentication();
 app.UseAuthorization();

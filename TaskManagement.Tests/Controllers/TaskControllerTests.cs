@@ -5,7 +5,6 @@ using TaskManagement.API.Controllers;
 using TaskManagement.Application.Services;
 using TaskManagement.Application.DTOs;
 using System.Security.Claims;
-using Xunit;
 
 namespace TaskManagement.Tests.Controllers;
 
@@ -46,10 +45,10 @@ public class TaskControllerTests
         _mockTaskService.Setup(s => s.CreateTaskAsync(1, dto))
                         .ReturnsAsync(createdTask);
 
-        // Act - Call the actual method name in your controller
+        // Act 
         var result = await _controller.CreateTask(dto);
 
-        // Assert - Match the 'Created' return type in your controller
+        // Assert 
         var createdResult = Assert.IsType<CreatedResult>(result);
         Assert.Equal(201, createdResult.StatusCode);
         Assert.Equal($"/api/tasks/{createdTask.Id}", createdResult.Location);
@@ -62,10 +61,58 @@ public class TaskControllerTests
         _mockTaskService.Setup(s => s.GetTaskByIdAsync(99, 1))
                         .ReturnsAsync((TaskManagement.Domain.Entities.TaskItem?)null);
 
-        // Act - Call the actual method name in your controller
+        // Act 
         var result = await _controller.GetTask(99);
 
         // Assert
         Assert.IsType<NotFoundResult>(result);
+    }
+
+    [Fact]
+    public async Task GetTask_ExistingTask_ReturnsOkWithTask()
+    {
+        // Arrange
+        var expectedTask = new TaskManagement.Domain.Entities.TaskItem
+        {
+            Id = 1,
+            Title = "Existing Task",
+            UserId = 1
+        };
+
+        _mockTaskService.Setup(s => s.GetTaskByIdAsync(1, 1))
+                        .ReturnsAsync(expectedTask);
+
+        // Act
+        var result = await _controller.GetTask(1);
+
+        // Assert
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        var returnedTask = Assert.IsType<TaskManagement.Domain.Entities.TaskItem>(okResult.Value);
+        Assert.Equal(expectedTask.Id, returnedTask.Id);
+        Assert.Equal(expectedTask.Title, returnedTask.Title);
+    }
+
+    [Fact]
+    public async Task GetAllTasks_ReturnsOkWithListOfTasks()
+    {
+        // Arrange
+        var expectedTasks = new List<TaskManagement.Domain.Entities.TaskItem>
+        {
+            new TaskManagement.Domain.Entities.TaskItem { Id = 1, Title = "Task 1", UserId = 1 },
+            new TaskManagement.Domain.Entities.TaskItem { Id = 2, Title = "Task 2", UserId = 1 }
+        };
+
+        _mockTaskService.Setup(s => s.GetTasksByUserIdAsync(1))
+                        .ReturnsAsync(expectedTasks);
+
+        // Act
+        var result = await _controller.GetAllTasks();
+
+        // Assert
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        var returnedTasks = Assert.IsAssignableFrom<IEnumerable<TaskManagement.Domain.Entities.TaskItem>>(okResult.Value);
+
+        Assert.NotNull(returnedTasks);
+        Assert.Equal(2, returnedTasks.Count());
     }
 }
