@@ -40,24 +40,28 @@ public class TaskService : ITaskService
 
         return await _taskRepository.AddAsync(taskItem);
     }
-
-    public Task<IEnumerable<TaskItem>> GetTasksByUserIdAsync(int userId)
+    public async Task<IEnumerable<TaskItem>> GetTasksByUserIdAsync(int userId)
     {
-        throw new NotImplementedException();
+        return await _taskRepository.GetByUserIdAsync(userId);
     }
-
-    public Task<TaskItem?> GetTaskByIdAsync(int id, int userId)
+    public async Task<TaskItem?> GetTaskByIdAsync(int id, int userId)
     {
-        throw new NotImplementedException();
+        return await _taskRepository.GetByIdAsync(id, userId);
     }
-
-    public Task<bool> UpdateTaskAsync(int id, int userId, UpdateTaskDto dto)
+    public async Task<bool> UpdateTaskAsync(int id, int userId, UpdateTaskDto dto)
     {
-        throw new NotImplementedException();
+        var existingTask = await _taskRepository.GetByIdAsync(id, userId);
+        if (existingTask == null) return false;
+
+        existingTask.Title = dto.Title;
+        existingTask.Description = dto.Description;
+        existingTask.Status = dto.Status;
+        existingTask.DueDate = dto.DueDate;
+
+        return await _taskRepository.UpdateAsync(existingTask);
     }
-
-    public Task<bool> DeleteTaskAsync(int id, int userId)
+    public async Task<bool> DeleteTaskAsync(int id, int userId)
     {
-        throw new NotImplementedException();
+        return await _taskRepository.DeleteAsync(id, userId);
     }
 }

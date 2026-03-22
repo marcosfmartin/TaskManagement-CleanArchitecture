@@ -2,8 +2,11 @@ using TaskManagement.Application.DTOs;
 using TaskManagement.Domain.Entities;
 using TaskManagement.Domain.Interfaces;
 using Microsoft.Extensions.Configuration;
-using TaskManagement.Application.Services;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Text;
+using BC = BCrypt.Net.BCrypt;
 
 namespace TaskManagement.Application.Services;
 
@@ -24,18 +27,52 @@ public class AuthService : IAuthService
         _configuration = configuration;
     }
 
-    public Task<User> RegisterAsync(AuthDto dto)
+    public async Task<User> RegisterAsync(AuthDto dto)
     {
-        throw new NotImplementedException();
+        var existingUser = await _userRepository.GetByUsernameAsync(dto.Username);
+        if (existingUser != null)
+        {
+            throw new InvalidOperationException("Username is already taken.");
+        }
+
+        var user = new User
+        {
+            Username = dto.Username,
+            PasswordHash = BC.HashPassword(dto.Password)
+        };
+
+        return await _userRepository.CreateAsync(user);
     }
 
-    public Task<string?> LoginAsync(AuthDto dto)
+    public async Task<string?> LoginAsync(AuthDto dto)
     {
-        throw new NotImplementedException();
+        var user = await _userRepository.GetByUsernameAsync(dto.Username);
+
+        if (user == null || !BC.Verify(dto.Password, user.PasswordHash))
+            return null;
+
+        return CreateToken(user);
     }
 
     private string CreateToken(User user)
     {
-        throw new NotImplementedException();
+        var claims = new List<Claim> {
+            new Claim(ClaimTypes.Name, user.Username),
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
+        };
+
+        var secret = _configuration["AppSettings:Token"]
+                     ?? throw new InvalidOperationException("JWT Token key is missing in appsettings.json");
+
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
+
+        var token = new JwtSecurityToken(
+            claims: claims,
+            expires: DateTime.Now.AddDays(1),
+            signingCredentials: creds
+        );
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
     }
 }
