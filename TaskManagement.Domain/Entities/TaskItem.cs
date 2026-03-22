@@ -1,3 +1,4 @@
+namespace TaskManagement.Domain.Entities;
 public class TaskItem
 {
     public int Id { get; set; }

@@ -1,5 +1,11 @@
 using Moq;
 using Xunit;
+using TaskManagement.Application.Services;
+using TaskManagement.Application.DTOs;
+using TaskManagement.Domain.Entities;
+using TaskManagement.Domain.Interfaces;
+
+namespace TaskManagement.Tests;
 
 public class TaskServiceTests
 {
@@ -8,7 +14,6 @@ public class TaskServiceTests
 
     public TaskServiceTests()
     {
-        // Arrange: Setup the mock repository
         _mockTaskRepo = new Mock<ITaskRepository>();
         _taskService = new TaskService(_mockTaskRepo.Object);
     }
@@ -57,7 +62,7 @@ public class TaskServiceTests
         {
             Title = "Too Late",
             Description = "This is in the past",
-            DueDate = DateTime.UtcNow.AddDays(-1) // Past date!
+            DueDate = DateTime.UtcNow.AddDays(-1)
         };
 
         // Act & Assert
@@ -65,8 +70,6 @@ public class TaskServiceTests
             _taskService.CreateTaskAsync(userId, dto));
 
         Assert.Equal("Due date cannot be in the past.", exception.Message);
-
-        // Ensure the repository was never called
         _mockTaskRepo.Verify(repo => repo.AddAsync(It.IsAny<TaskItem>()), Times.Never);
     }
 }
