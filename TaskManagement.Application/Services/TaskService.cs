@@ -7,6 +7,10 @@ namespace TaskManagement.Application.Services;
 public interface ITaskService
 {
     Task<TaskItem> CreateTaskAsync(int userId, CreateTaskDto dto);
+    Task<IEnumerable<TaskItem>> GetTasksByUserIdAsync(int userId);
+    Task<TaskItem?> GetTaskByIdAsync(int id, int userId);
+    Task<bool> UpdateTaskAsync(int id, int userId, UpdateTaskDto dto);
+    Task<bool> DeleteTaskAsync(int id, int userId);
 }
 
 public class TaskService : ITaskService
@@ -35,5 +39,25 @@ public class TaskService : ITaskService
         };
 
         return await _taskRepository.AddAsync(taskItem);
+    }
+
+    public Task<IEnumerable<TaskItem>> GetTasksByUserIdAsync(int userId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<TaskItem?> GetTaskByIdAsync(int id, int userId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<bool> UpdateTaskAsync(int id, int userId, UpdateTaskDto dto)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<bool> DeleteTaskAsync(int id, int userId)
+    {
+        throw new NotImplementedException();
     }
 }
