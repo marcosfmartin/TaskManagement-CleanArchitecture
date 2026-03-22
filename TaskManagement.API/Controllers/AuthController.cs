@@ -18,14 +18,31 @@ public class AuthController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] AuthDto dto)
     {
-        // TDD RED: Interface is wired, but logic is missing
-        throw new NotImplementedException();
+        try
+        {
+            var user = await _authService.RegisterAsync(dto);
+            return Ok(new { message = "User registered successfully", username = user.Username });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+        catch (Exception)
+        {
+            return StatusCode(500, "An error occurred during registration.");
+        }
     }
 
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] AuthDto dto)
     {
-        // TDD RED: Interface is wired, but logic is missing
-        throw new NotImplementedException();
+        var token = await _authService.LoginAsync(dto);
+
+        if (token == null)
+        {
+            return Unauthorized(new { message = "Invalid username or password." });
+        }
+
+        return Ok(new { Token = token });
     }
 }

@@ -18,14 +18,36 @@ public class TasksController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateTask([FromBody] CreateTaskDto dto)
     {
-        // TDD RED: Endpoint defined, but implementation is missing
-        throw new NotImplementedException();
+        try
+        {
+            var task = await _taskService.CreateTaskAsync(1, dto);
+
+            return Created($"/api/tasks/{task.Id}", task);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetTask(int id)
     {
-        // TDD RED: Endpoint defined, but implementation is missing
-        throw new NotImplementedException();
+        var userId = 1;
+        var task = await _taskService.GetTaskByIdAsync(id, userId);
+
+        if (task == null) return NotFound();
+
+        var response = new TaskResponseDto
+        {
+            Id = task.Id,
+            Title = task.Title,
+            Description = task.Description,
+            DueDate = task.DueDate,
+            Status = task.Status,
+            UserId = task.UserId
+        };
+
+        return Ok(response);
     }
 }
