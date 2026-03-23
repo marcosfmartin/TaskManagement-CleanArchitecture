@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: task_api
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Data Source=/app/data/TaskMgmt.db
+    volumes:
+      - ./sqlite_data:/app/data 
+
+  web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: task_web
+    ports:
+      - "3000:80"
+    depends_on:
+      - api
