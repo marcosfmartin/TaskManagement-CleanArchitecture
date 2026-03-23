@@ -64,3 +64,8 @@ docker-compose up -d --build
 ```
 
 Alternatively, you can manually run the API and frontend using visual studio and npm run dev
+
+
+There is already data setted up in the database. You can register a new user or log in using
+login: demouser
+password: password123!
