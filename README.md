@@ -63,6 +63,8 @@ The easiest way to review and run this application is via Docker.
 docker-compose up -d --build
 ```
 
+4. The application should be available at localhost:3000
+
 Alternatively, you can manually run the API and frontend using visual studio and npm run dev
 
 
